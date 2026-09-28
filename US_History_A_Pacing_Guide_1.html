@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>US History A Pacing Planner</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&display=swap">
+<style>
+  :root{
+    --bg:#eef2f7;
+    --surface:#ffffff;
+    --surface-2:#f4f7fb;
+    --ink:#1b2430;
+    --ink-muted:#5b6472;
+    --line:#d7dee8;
+    --accent:#2f5fa8;
+    --accent-strong:#1f3f73;
+    --accent-ink:#ffffff;
+    --good:#2f8f5b;
+    --good-bg:#e8f5ee;
+    --warn:#b5790b;
+    --warn-bg:#fbf3e2;
+    --danger:#c0392b;
+    --danger-bg:#fbebe9;
+    --shadow:0 1px 3px rgba(20,25,40,0.08), 0 1px 2px rgba(20,25,40,0.06);
+    color-scheme:light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#11151d;
+      --surface:#1a2028;
+      --surface-2:#212836;
+      --ink:#e7ebf2;
+      --ink-muted:#9aa3b2;
+      --line:#2a3140;
+      --accent:#8fb2e6;
+      --accent-strong:#bcd4f5;
+      --accent-ink:#0c1622;
+      --good:#5cc98d;
+      --good-bg:#173226;
+      --warn:#e0ab4a;
+      --warn-bg:#3a2c10;
+      --danger:#e78277;
+      --danger-bg:#3a1b17;
+      --shadow:0 1px 3px rgba(0,0,0,0.35), 0 1px 2px rgba(0,0,0,0.3);
+      color-scheme:dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#11151d;
+    --surface:#1a2028;
+    --surface-2:#212836;
+    --ink:#e7ebf2;
+    --ink-muted:#9aa3b2;
+    --line:#2a3140;
+    --accent:#8fb2e6;
+    --accent-strong:#bcd4f5;
+    --accent-ink:#0c1622;
+    --good:#5cc98d;
+    --good-bg:#173226;
+    --warn:#e0ab4a;
+    --warn-bg:#3a2c10;
+    --danger:#e78277;
+    --danger-bg:#3a1b17;
+    --shadow:0 1px 3px rgba(0,0,0,0.35), 0 1px 2px rgba(0,0,0,0.3);
+    color-scheme:dark;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:"Public Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    line-height:1.45;
+    padding-inline:16px;
+    padding-block:20px 40px;
+  }
+  h1,h2,h3{font-family:"Fraunces","Iowan Old Style",Georgia,serif;}
+
+  .wrap{max-width:880px;margin:0 auto;display:flex;flex-direction:column;gap:16px;}
+
+  header.top{
+    background:linear-gradient(135deg,var(--accent-strong),var(--accent));
+    color:var(--accent-ink);
+    border-radius:14px;
+    padding:22px 24px;
+    box-shadow:var(--shadow);
+  }
+  header.top h1{margin:0 0 6px;font-size:1.5rem;font-weight:600;text-wrap:balance;}
+  header.top p{margin:0;font-size:0.94rem;opacity:0.92;max-width:60ch;}
+
+  .card{
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:14px;
+    box-shadow:var(--shadow);
+    padding:20px 22px;
+  }
+  .card h2{
+    margin:0 0 4px;
+    font-size:1.15rem;
+    font-weight:600;
+    color:var(--ink);
+  }
+  .card .lede{margin:0 0 16px;font-size:0.86rem;color:var(--ink-muted);}
+
+  .field-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px;
+    margin-bottom:14px;
+  }
+  .field{
+    flex:1 1 180px;
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+  }
+  .field label{
+    font-size:0.78rem;
+    font-weight:600;
+    color:var(--ink-muted);
+    text-transform:uppercase;
+    letter-spacing:0.03em;
+  }
+  .field input[type="date"],
+  .field input[type="text"]{
+    padding:9px 10px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    font-size:0.95rem;
+    font-family:inherit;
+    background:var(--surface);
+    color:var(--ink);
+  }
+  .field input:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
+
+  .day-toggles{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:16px;
+  }
+  .day-toggle{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:6px 13px;
+    font-size:0.85rem;
+    cursor:pointer;
+    user-select:none;
+  }
+  .day-toggle input{margin:0;}
+  .day-toggle.active{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600;}
+
+  .btn-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+  button{
+    font-family:inherit;
+    font-size:0.88rem;
+    font-weight:600;
+    padding:10px 18px;
+    border-radius:8px;
+    border:1px solid transparent;
+    cursor:pointer;
+  }
+  button:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  .btn-primary{background:var(--accent);color:var(--accent-ink);}
+  .btn-primary:hover{background:var(--accent-strong);}
+  .btn-secondary{background:var(--surface-2);color:var(--ink);border-color:var(--line);}
+  .btn-secondary:hover{background:var(--line);}
+  #statusMsg{font-size:0.85rem;color:var(--danger);font-weight:600;}
+
+  .confirm-inline{
+    display:none;
+    align-items:center;
+    gap:10px;
+    background:var(--warn-bg);
+    color:var(--warn);
+    border-radius:8px;
+    padding:8px 12px;
+    font-size:0.85rem;
+    font-weight:600;
+  }
+  .confirm-inline.show{display:flex;}
+  .confirm-inline button{padding:5px 12px;font-size:0.8rem;}
+
+  .summary-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
+    gap:10px;
+    margin-top:16px;
+  }
+  .stat{
+    background:var(--surface-2);
+    border-radius:10px;
+    padding:11px 13px;
+  }
+  .stat .num{font-size:1.4rem;font-weight:700;color:var(--accent-strong);font-variant-numeric:tabular-nums;}
+  .stat .lbl{font-size:0.73rem;color:var(--ink-muted);text-transform:uppercase;letter-spacing:0.03em;}
+
+  .progress-outer{
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    border-radius:20px;
+    height:14px;
+    overflow:hidden;
+    margin-top:14px;
+  }
+  .progress-inner{
+    background:var(--good);
+    height:100%;
+    width:0%;
+    transition:width 0.3s ease;
+  }
+  .progress-text{font-size:0.82rem;color:var(--ink-muted);margin-top:6px;}
+
+  .unit-block{margin-bottom:4px;}
+  .unit-header{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:10px;
+    padding:10px 2px 9px;
+    border-bottom:2px solid var(--surface-2);
+    margin-top:20px;
+  }
+  .unit-header:first-child{margin-top:0;}
+  .unit-header h3{margin:0;font-size:1.05rem;font-weight:600;color:var(--accent-strong);}
+  .unit-header .unit-meta{font-size:0.76rem;color:var(--ink-muted);white-space:nowrap;}
+
+  .table-scroll{overflow-x:auto;}
+  table.plan{width:100%;border-collapse:collapse;min-width:480px;}
+  table.plan thead th{
+    text-align:left;
+    font-size:0.7rem;
+    text-transform:uppercase;
+    letter-spacing:0.04em;
+    color:var(--ink-muted);
+    padding:8px 6px;
+    border-bottom:1px solid var(--line);
+  }
+  table.plan td{
+    padding:9px 6px;
+    border-bottom:1px solid var(--surface-2);
+    font-size:0.92rem;
+    vertical-align:middle;
+  }
+  tr.done td{color:var(--ink-muted);}
+  tr.done .aname{text-decoration:line-through;}
+  tr.overdue td.datecell{color:var(--danger);font-weight:700;}
+  tr.today td.datecell{color:var(--warn);font-weight:700;}
+
+  .aname{font-weight:600;color:var(--ink);}
+  .anum{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:0.76rem;color:var(--ink-muted);margin-right:7px;}
+  .badge{
+    display:inline-block;
+    font-size:0.66rem;
+    font-weight:700;
+    padding:2px 8px;
+    border-radius:10px;
+    text-transform:uppercase;
+    letter-spacing:0.03em;
+  }
+  .badge.Quiz{background:var(--warn-bg);color:var(--warn);}
+  .badge.Assignment{background:var(--surface-2);color:var(--accent-strong);}
+  .badge.UnitTest{background:var(--danger-bg);color:var(--danger);}
+
+  input.chk{width:18px;height:18px;cursor:pointer;accent-color:var(--accent);}
+  .datecell{white-space:nowrap;font-weight:600;font-variant-numeric:tabular-nums;}
+  .ptscell{white-space:nowrap;color:var(--ink-muted);font-variant-numeric:tabular-nums;}
+
+  .footnote{
+    text-align:center;
+    color:var(--ink-muted);
+    font-size:0.78rem;
+    padding-block:4px 6px;
+  }
+
+  @media (max-width:520px){
+    table.plan thead{display:none;}
+    table.plan, table.plan tbody, table.plan tr, table.plan td{display:block;width:100%;}
+    table.plan tr{border-bottom:1px solid var(--line);padding-block:10px;}
+    table.plan td{border:none;padding-block:3px;}
+    td.chkcell{display:flex;align-items:center;gap:10px;}
+    td.chkcell::before{content:"Done:";font-size:0.75rem;color:var(--ink-muted);}
+    td.datecell::before{content:"Target date: ";font-size:0.75rem;color:var(--ink-muted);font-weight:400;}
+    td.ptscell::before{content:"Points: ";font-size:0.75rem;color:var(--ink-muted);font-weight:400;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <h1>US History A Pacing Planner</h1>
+    <p>Pick a start date and the date you want to finish, check off what you've already done, and this planner spreads the rest out evenly so you always know when to work on each item.</p>
+  </header>
+
+  <div class="card">
+    <h2>1. Your plan</h2>
+    <p class="lede">This stays on your device — your teacher doesn't see your checkmarks.</p>
+    <div class="field-row">
+      <div class="field">
+        <label for="studentName">Your name (optional)</label>
+        <input type="text" id="studentName" placeholder="e.g. Jordan S.">
+      </div>
+      <div class="field">
+        <label for="startDate">Start date</label>
+        <input type="date" id="startDate">
+      </div>
+      <div class="field">
+        <label for="endDate">Finish by</label>
+        <input type="date" id="endDate">
+      </div>
+    </div>
+
+    <label style="font-size:0.78rem;font-weight:600;color:var(--ink-muted);text-transform:uppercase;letter-spacing:0.03em;display:block;margin-bottom:8px;">Which days will you work on this class?</label>
+    <div class="day-toggles" id="dayToggles"></div>
+
+    <div class="btn-row">
+      <button class="btn-primary" id="buildBtn">Build my plan</button>
+      <button class="btn-secondary" id="copyBtn">Copy plan as text</button>
+      <button class="btn-secondary" id="resetBtn">Reset checkmarks</button>
+      <span id="statusMsg" role="status"></span>
+    </div>
+
+    <div class="confirm-inline" id="confirmInline">
+      <span>Clear all your checkmarks? Dates won't change.</span>
+      <button class="btn-primary" id="confirmYes" style="background:var(--danger);">Yes, clear</button>
+      <button class="btn-secondary" id="confirmNo">Cancel</button>
+    </div>
+
+    <div class="summary-grid" id="summaryGrid" style="display:none;"></div>
+    <div class="progress-outer" id="progressOuter" style="display:none;">
+      <div class="progress-inner" id="progressInner"></div>
+    </div>
+    <div class="progress-text" id="progressText"></div>
+  </div>
+
+  <div class="card">
+    <h2>2. Your assignments</h2>
+    <p class="lede">Check off anything you've already completed — it drops out of the schedule below and the rest re-spaces automatically.</p>
+    <div id="planBody"></div>
+  </div>
+
+  <p class="footnote">US History A · Livonia · 2026–2027</p>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---- assignment data (curriculum order, from the gradebook) ----
+  var ASSIGNMENTS = [{"num": "1.0.1", "name": "Unit 1 Vocabulary", "id": "45695", "points": 15.0, "type": "Assignment"}, {"num": "1.1.3", "name": "Rights and Values Assignment", "id": "45700", "points": 40.0, "type": "Assignment"}, {"num": "1.2.2", "name": "Core Democratic Ideals Assignment", "id": "45704", "points": 10.0, "type": "Assignment"}, {"num": "1.2.3", "name": "The Legislative Branch Assignment", "id": "45711", "points": 10.0, "type": "Assignment"}, {"num": "1.2.4", "name": "Documents Quiz", "id": "45714", "points": 5.0, "type": "Quiz"}, {"num": "1.3.1", "name": "Westward Expansion Map Assignment", "id": "45720", "points": 10.0, "type": "Assignment"}, {"num": "1.3.3", "name": "Manifest Destiny Guided Notes", "id": "45725", "points": 20.0, "type": "Assignment"}, {"num": "1.3.4", "name": "Significant Events Before 1877 Quiz", "id": "45731", "points": 5.0, "type": "Quiz"}, {"num": "1.4.0", "name": "Unit Test | Foundations of US History", "id": "45738", "points": 9.0, "type": "Unit Test"}, {"num": "2.1.2", "name": "T-Chart Notes", "id": "45750", "points": 10.0, "type": "Assignment"}, {"num": "2.1.3", "name": "Land of Innovation and Production Quiz", "id": "45755", "points": 6.0, "type": "Quiz"}, {"num": "2.2.2", "name": "The 1892 Battle of Homestead Assignment", "id": "45760", "points": 15.0, "type": "Assignment"}, {"num": "2.2.3", "name": "History of the Labor Movement Assignment", "id": "45764", "points": 10.0, "type": "Assignment"}, {"num": "2.2.4", "name": "Workers Fight for Protection and Rights Quiz", "id": "45769", "points": 6.0, "type": "Quiz"}, {"num": "2.3.1", "name": "Negative Effects of the Industrial Revolution Assignment", "id": "45773", "points": 10.0, "type": "Assignment"}, {"num": "2.3.2", "name": "Growth, Cities, and Immigration Assignment", "id": "45779", "points": 10.0, "type": "Assignment"}, {"num": "2.3.3", "name": "Industry Changes Life Quiz", "id": "45783", "points": 5.0, "type": "Quiz"}, {"num": "2.4.1", "name": "Population Chart Assignment", "id": "45790", "points": 10.0, "type": "Assignment"}, {"num": "2.4.2", "name": "Where People Move and Why Quiz", "id": "45795", "points": 7.0, "type": "Quiz"}, {"num": "2.5.1", "name": "The Evolution of the Auto Industry Assignment", "id": "45804", "points": 10.0, "type": "Assignment"}, {"num": "2.5.2", "name": "Henry Ford and Michigan Industry Quiz", "id": "45808", "points": 5.0, "type": "Quiz"}, {"num": "2.6.0", "name": "Unit Test | Industrialization", "id": "45833", "points": 13.0, "type": "Unit Test"}, {"num": "3.1.2", "name": "US Imperialism Assignment", "id": "45840", "points": 10.0, "type": "Assignment"}, {"num": "3.1.3", "name": "Roosevelt Corollary Assignment", "id": "45843", "points": 10.0, "type": "Assignment"}, {"num": "3.1.4", "name": "America on the Global Stage Quiz", "id": "45848", "points": 8.0, "type": "Quiz"}, {"num": "3.2.1", "name": "5 Key Causes of World War I Assignment", "id": "45853", "points": 10.0, "type": "Assignment"}, {"num": "3.2.2", "name": "Causes of World War I Quiz", "id": "45861", "points": 8.0, "type": "Quiz"}, {"num": "3.3.1", "name": "T-Chart Notes", "id": "45865", "points": 10.0, "type": "Assignment"}, {"num": "3.3.3", "name": "The US Role in WWI Assignment", "id": "45870", "points": 10.0, "type": "Assignment"}, {"num": "3.3.4", "name": "The Zimmerman Telegram Assignment", "id": "45872", "points": 10.0, "type": "Assignment"}, {"num": "3.3.5", "name": "America Gets into WWI Quiz", "id": "45878", "points": 9.0, "type": "Quiz"}, {"num": "3.4.1", "name": "Domestic Impact of WWI Assignment", "id": "45885", "points": 10.0, "type": "Assignment"}, {"num": "3.4.2", "name": "How WWI Affected Americans at Home Quiz", "id": "45888", "points": 8.0, "type": "Quiz"}, {"num": "3.5.1", "name": "The Changing Boundaries of Europe Assignment", "id": "45894", "points": 10.0, "type": "Assignment"}, {"num": "3.5.2", "name": "The League of Nations Assignment", "id": "45899", "points": 10.0, "type": "Assignment"}, {"num": "3.5.3", "name": "The Treaty of Versailles Assignment", "id": "45904", "points": 10.0, "type": "Assignment"}, {"num": "3.5.4", "name": "President Wilson's Plan to Avert World Conflicts Quiz", "id": "45909", "points": 10.0, "type": "Quiz"}, {"num": "3.6.0", "name": "Unit Test | Globalization and World War I", "id": "45913", "points": 7.0, "type": "Unit Test"}, {"num": "4.1.2", "name": "Issues and Impacts Assignment", "id": "45916", "points": 10.0, "type": "Assignment"}, {"num": "4.1.3", "name": "Problems Related to Unregulated Industry Quiz", "id": "45918", "points": 5.0, "type": "Quiz"}, {"num": "4.2.1", "name": "Americans Demand Change Quiz", "id": "45921", "points": 5.0, "type": "Quiz"}, {"num": "4.3.1", "name": "Changes Achieved Quiz", "id": "45924", "points": 5.0, "type": "Quiz"}, {"num": "4.4.1", "name": "Women's Suffrage Assignment", "id": "45927", "points": 10.0, "type": "Assignment"}, {"num": "4.4.2", "name": "Suffragists Assignment", "id": "45928", "points": 10.0, "type": "Assignment"}, {"num": "4.4.3", "name": "Women Fight for Rights Quiz", "id": "45931", "points": 5.0, "type": "Quiz"}, {"num": "4.5.0", "name": "Unit Test | Progressivism", "id": "45934", "points": 20.0, "type": "Unit Test"}, {"num": "5.1.2", "name": "Roaring Twenties T-Chart Notes", "id": "45937", "points": 10.0, "type": "Assignment"}, {"num": "5.1.4", "name": "Cultural Movements in the 1920's Assignment", "id": "45940", "points": 10.0, "type": "Assignment"}, {"num": "5.1.5", "name": "The Roaring Twenties Quiz", "id": "45941", "points": 8.0, "type": "Quiz"}, {"num": "5.2.1", "name": "Causes of the Great Depression Quiz", "id": "45946", "points": 12.0, "type": "Quiz"}, {"num": "5.3.1", "name": "Cause and Effect Notes", "id": "45949", "points": 10.0, "type": "Assignment"}, {"num": "5.3.2", "name": "Effects of the Great Depression Quiz", "id": "45950", "points": 20.0, "type": "Quiz"}, {"num": "5.4.1", "name": "New Deal Notes", "id": "45954", "points": 10.0, "type": "Assignment"}, {"num": "5.4.2", "name": "Franklin D. Roosevelt's New Deal Quiz", "id": "45956", "points": 13.0, "type": "Quiz"}, {"num": "5.5.0", "name": "Unit Test | The Roaring Twenties, Great Depression, and the New Deal", "id": "45959", "points": 15.0, "type": "Unit Test"}];
+
+  // Unit theme titles, inferred from each unit's Unit Test name
+  var UNIT_TITLES = {
+    "1":"Foundations of US History",
+    "2":"Industrialization",
+    "3":"Globalization and World War I",
+    "4":"Progressivism",
+    "5":"The Roaring Twenties, Great Depression, and the New Deal"
+  };
+
+  var DAY_NAMES = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  var STORAGE_KEY = "ushistoryA_pacing_v1";
+
+  var els = {
+    studentName: document.getElementById("studentName"),
+    startDate: document.getElementById("startDate"),
+    endDate: document.getElementById("endDate"),
+    dayToggles: document.getElementById("dayToggles"),
+    buildBtn: document.getElementById("buildBtn"),
+    copyBtn: document.getElementById("copyBtn"),
+    resetBtn: document.getElementById("resetBtn"),
+    statusMsg: document.getElementById("statusMsg"),
+    summaryGrid: document.getElementById("summaryGrid"),
+    progressOuter: document.getElementById("progressOuter"),
+    progressInner: document.getElementById("progressInner"),
+    progressText: document.getElementById("progressText"),
+    planBody: document.getElementById("planBody"),
+    confirmInline: document.getElementById("confirmInline"),
+    confirmYes: document.getElementById("confirmYes"),
+    confirmNo: document.getElementById("confirmNo")
+  };
+
+  // ---- state ----
+  var state = {
+    studentName: "",
+    startDate: "",
+    endDate: "",
+    workDays: [1,2,3,4,5], // Mon-Fri default (0=Sun...6=Sat)
+    completed: {}          // { assignmentId: true }
+  };
+
+  // ---- safe local storage (per-device; won't sync between devices) ----
+  function loadState(){
+    try{
+      var raw = window.localStorage.getItem(STORAGE_KEY);
+      if(raw){
+        var saved = JSON.parse(raw);
+        Object.assign(state, saved);
+      }
+    }catch(e){ /* storage unavailable — plan simply won't persist between visits */ }
+  }
+  function saveState(){
+    try{
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }catch(e){ /* ignore — non-fatal */ }
+  }
+
+  // ---- build day-of-week toggles ----
+  function renderDayToggles(){
+    els.dayToggles.innerHTML = "";
+    DAY_NAMES.forEach(function(name, idx){
+      var id = "day_" + idx;
+      var wrap = document.createElement("label");
+      wrap.className = "day-toggle" + (state.workDays.indexOf(idx) > -1 ? " active" : "");
+      wrap.setAttribute("for", id);
+      var cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.id = id;
+      cb.checked = state.workDays.indexOf(idx) > -1;
+      cb.addEventListener("change", function(){
+        var pos = state.workDays.indexOf(idx);
+        if(cb.checked && pos === -1){ state.workDays.push(idx); }
+        if(!cb.checked && pos > -1){ state.workDays.splice(pos,1); }
+        wrap.classList.toggle("active", cb.checked);
+        computeAndRender();
+      });
+      wrap.appendChild(cb);
+      wrap.appendChild(document.createTextNode(name));
+      els.dayToggles.appendChild(wrap);
+    });
+  }
+
+  function parseDate(str){
+    if(!str) return null;
+    var parts = str.split("-");
+    if(parts.length !== 3) return null;
+    return new Date(parseInt(parts[0],10), parseInt(parts[1],10)-1, parseInt(parts[2],10));
+  }
+  function fmtDate(d){
+    if(!d) return "";
+    return d.toLocaleDateString(undefined, { weekday:"short", month:"short", day:"numeric" });
+  }
+  function isoDate(d){
+    var y=d.getFullYear(), m=("0"+(d.getMonth()+1)).slice(-2), dd=("0"+d.getDate()).slice(-2);
+    return y+"-"+m+"-"+dd;
+  }
+  function sameDay(a,b){ return a && b && isoDate(a)===isoDate(b); }
+  function todayMidnight(){
+    var t = new Date();
+    t.setHours(0,0,0,0);
+    return t;
+  }
+
+  // Build the list of eligible calendar days between start and end (inclusive)
+  function buildWorkDayList(start, end, workDays){
+    var days = [];
+    if(!start || !end || end < start) return days;
+    var cur = new Date(start.getTime());
+    while(cur <= end){
+      if(workDays.indexOf(cur.getDay()) > -1){
+        days.push(new Date(cur.getTime()));
+      }
+      cur.setDate(cur.getDate()+1);
+    }
+    return days;
+  }
+
+  function badgeClass(type){
+    if(type === "Unit Test") return "UnitTest";
+    return type;
+  }
+
+  var lastRemaining = [];
+  var lastTargetDate = {};
+
+  function computeAndRender(){
+    state.studentName = els.studentName.value;
+    state.startDate = els.startDate.value;
+    state.endDate = els.endDate.value;
+    saveState();
+
+    var start = parseDate(state.startDate);
+    var end = parseDate(state.endDate);
+
+    els.statusMsg.textContent = "";
+    if(state.startDate && state.endDate && end && start && end < start){
+      els.statusMsg.textContent = "Your finish date is before your start date — pick dates in order.";
+    }
+    if(state.startDate && state.endDate && start && end && end >= start && state.workDays.length === 0){
+      els.statusMsg.textContent = "Choose at least one day of the week you'll work on this class.";
+    }
+
+    var remaining = ASSIGNMENTS.filter(function(a){ return !state.completed[a.id]; });
+    var workDayList = (start && end && end >= start && state.workDays.length) ? buildWorkDayList(start, end, state.workDays) : [];
+
+    // map assignment.id -> target Date (or null)
+    var targetDate = {};
+    if(workDayList.length > 0 && remaining.length > 0){
+      var n = remaining.length, d = workDayList.length;
+      remaining.forEach(function(a, i){
+        var idx = Math.floor(i * d / n);
+        if(idx >= d) idx = d-1;
+        targetDate[a.id] = workDayList[idx];
+      });
+    }
+
+    lastRemaining = remaining;
+    lastTargetDate = targetDate;
+
+    renderSummary(remaining, workDayList, start, end);
+    renderTable(targetDate);
+  }
+
+  function renderSummary(remaining, workDayList, start, end){
+    var total = ASSIGNMENTS.length;
+    var doneCount = total - remaining.length;
+    var remainingPts = remaining.reduce(function(s,a){ return s + (a.points||0); }, 0);
+    var pct = total ? Math.round((doneCount/total)*100) : 0;
+
+    els.progressOuter.style.display = "block";
+    els.progressInner.style.width = pct + "%";
+    els.progressText.textContent = doneCount + " of " + total + " items completed (" + pct + "%)";
+
+    var stats = [];
+    stats.push({num: remaining.length, lbl: "Items left"});
+    if(start && end && end >= start){
+      stats.push({num: workDayList.length, lbl: "Work days in plan"});
+      var perDay = workDayList.length ? (remaining.length / workDayList.length) : 0;
+      stats.push({num: (Math.round(perDay*10)/10), lbl: "Avg items / day"});
+    }
+    stats.push({num: Math.round(remainingPts), lbl: "Points remaining"});
+
+    els.summaryGrid.style.display = "grid";
+    els.summaryGrid.innerHTML = "";
+    stats.forEach(function(s){
+      var div = document.createElement("div");
+      div.className = "stat";
+      div.innerHTML = '<div class="num">'+s.num+'</div><div class="lbl">'+s.lbl+'</div>';
+      els.summaryGrid.appendChild(div);
+    });
+  }
+
+  function renderTable(targetDate){
+    var today = todayMidnight();
+    var byUnit = {};
+    var order = [];
+    ASSIGNMENTS.forEach(function(a){
+      var unit = a.num.split(".")[0];
+      if(!byUnit[unit]){ byUnit[unit] = []; order.push(unit); }
+      byUnit[unit].push(a);
+    });
+
+    var html = "";
+    order.forEach(function(unit){
+      var items = byUnit[unit];
+      html += '<div class="unit-block">';
+      html += '<div class="unit-header"><h3>Unit '+unit+': '+(UNIT_TITLES[unit] || "")+'</h3>' +
+              '<span class="unit-meta">'+items.length+' items</span></div>';
+      html += '<div class="table-scroll"><table class="plan"><thead><tr>' +
+              '<th style="width:34px;">Done</th><th>Assignment</th><th style="width:100px;">Points</th><th style="width:150px;">Target date</th>' +
+              '</tr></thead><tbody>';
+
+      items.forEach(function(a){
+        var done = !!state.completed[a.id];
+        var dt = targetDate[a.id];
+        var rowClass = done ? "done" : "";
+        var dateHtml = "—";
+        if(!done && dt){
+          dateHtml = fmtDate(dt);
+          if(dt < today){ rowClass += " overdue"; }
+          else if(sameDay(dt, today)){ rowClass += " today"; }
+        } else if(done){
+          dateHtml = "Completed";
+        }
+        html += '<tr class="'+rowClass.trim()+'" data-id="'+a.id+'">' +
+          '<td class="chkcell"><input type="checkbox" class="chk" id="chk_'+a.id+'" data-id="'+a.id+'" '+(done?"checked":"")+'></td>' +
+          '<td><span class="anum">'+a.num+'</span><span class="aname">'+escapeHtml(a.name)+'</span> ' +
+            '<span class="badge '+badgeClass(a.type)+'">'+a.type+'</span></td>' +
+          '<td class="ptscell">'+(a.points!=null ? a.points+" pts" : "—")+'</td>' +
+          '<td class="datecell">'+dateHtml+'</td>' +
+          '</tr>';
+      });
+
+      html += '</tbody></table></div></div>';
+    });
+
+    els.planBody.innerHTML = html;
+
+    // wire checkboxes
+    var boxes = els.planBody.querySelectorAll("input.chk");
+    boxes.forEach(function(cb){
+      cb.addEventListener("change", function(){
+        var id = cb.getAttribute("data-id");
+        if(cb.checked){ state.completed[id] = true; }
+        else { delete state.completed[id]; }
+        saveState();
+        computeAndRender();
+      });
+    });
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
+
+  function buildPlanText(){
+    var lines = [];
+    var name = state.studentName ? state.studentName + " — " : "";
+    lines.push(name + "US History A Pacing Plan");
+    lines.push("Start: " + (state.startDate || "—") + "   Finish by: " + (state.endDate || "—"));
+    lines.push("");
+    lastRemaining.forEach(function(a){
+      var dt = lastTargetDate[a.id];
+      var when = dt ? fmtDate(dt) : "—";
+      lines.push(a.num + "  " + a.name + "  (" + a.points + " pts)  →  " + when);
+    });
+    if(lastRemaining.length === 0){
+      lines.push("Everything is checked off. Nice work!");
+    }
+    return lines.join("\n");
+  }
+
+  function copyPlan(){
+    var text = buildPlanText();
+    function fallbackSelect(){
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      try{ document.execCommand("copy"); }catch(e){}
+      document.body.removeChild(ta);
+    }
+    var prevLabel = els.copyBtn.textContent;
+    function flash(msg){
+      els.copyBtn.textContent = msg;
+      setTimeout(function(){ els.copyBtn.textContent = prevLabel; }, 1600);
+    }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(function(){
+        flash("Copied!");
+      }).catch(function(){
+        fallbackSelect();
+        flash("Copied!");
+      });
+    } else {
+      fallbackSelect();
+      flash("Copied!");
+    }
+  }
+
+  function setDefaultDatesIfEmpty(){
+    if(!state.startDate){
+      var t = todayMidnight();
+      state.startDate = isoDate(t);
+    }
+    if(!state.endDate){
+      var t2 = todayMidnight();
+      t2.setDate(t2.getDate()+42); // ~6 weeks out, just a sensible default
+      state.endDate = isoDate(t2);
+    }
+  }
+
+  function init(){
+    loadState();
+    setDefaultDatesIfEmpty();
+
+    els.studentName.value = state.studentName || "";
+    els.startDate.value = state.startDate || "";
+    els.endDate.value = state.endDate || "";
+
+    renderDayToggles();
+    computeAndRender();
+
+    els.buildBtn.addEventListener("click", computeAndRender);
+    els.startDate.addEventListener("change", computeAndRender);
+    els.endDate.addEventListener("change", computeAndRender);
+    els.studentName.addEventListener("change", computeAndRender);
+
+    els.copyBtn.addEventListener("click", copyPlan);
+
+    els.resetBtn.addEventListener("click", function(){
+      els.confirmInline.classList.add("show");
+    });
+    els.confirmNo.addEventListener("click", function(){
+      els.confirmInline.classList.remove("show");
+    });
+    els.confirmYes.addEventListener("click", function(){
+      state.completed = {};
+      saveState();
+      els.confirmInline.classList.remove("show");
+      computeAndRender();
+    });
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
