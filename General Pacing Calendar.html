@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Pacing Calendar</title>
+<style>
+  :root {
+    --bg: #f6f7fb;
+    --card: #ffffff;
+    --ink: #1f2430;
+    --muted: #5d6475;
+    --line: #dde1ea;
+    --accent: #2f6fdf;
+    --accent-soft: #e6eefc;
+    --done: #1e8a55;
+    --done-soft: #e3f4ea;
+    --warn: #b35c00;
+    --warn-soft: #fff1e0;
+    --off: #eef0f4;
+    --today: #ffcf4a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14171e; --card: #1d2129; --ink: #e8ebf2; --muted: #a2a9b8; --line: #323846;
+      --accent: #6c9cff; --accent-soft: #23324f; --done: #4cc486; --done-soft: #1c3528;
+      --warn: #ffab5c; --warn-soft: #3a2a18; --off: #242832; --today: #d9a91f;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 20px 16px 48px; }
+  h1 { font-size: 1.6rem; margin: 0 0 4px; }
+  h2 { font-size: 1.2rem; margin: 0 0 12px; }
+  .sub { color: var(--muted); margin: 0 0 20px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px; margin-bottom: 18px; }
+  .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+  label { display: block; font-weight: 600; font-size: .95rem; margin-bottom: 4px; }
+  .hint { font-weight: 400; color: var(--muted); font-size: .85rem; }
+  input[type=text], input[type=number], input[type=date], textarea {
+    width: 100%; padding: 9px 10px; border: 1px solid var(--line); border-radius: 8px;
+    background: var(--bg); color: var(--ink); font: inherit;
+  }
+  textarea { min-height: 110px; resize: vertical; }
+  .days { display: flex; flex-wrap: wrap; gap: 6px; }
+  .days label { font-weight: 500; display: inline-flex; align-items: center; gap: 5px;
+    border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; margin: 0; cursor: pointer; }
+  .days input { accent-color: var(--accent); }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .row input[type=date] { width: auto; flex: 1 1 160px; }
+  button {
+    font: inherit; border: 0; border-radius: 8px; padding: 9px 16px; cursor: pointer;
+    background: var(--accent); color: #fff; font-weight: 600;
+  }
+  button.ghost { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+  button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid var(--today); outline-offset: 2px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .chip { background: var(--off); border-radius: 999px; padding: 3px 6px 3px 12px; font-size: .9rem; display: inline-flex; align-items: center; gap: 4px; }
+  .chip button { background: none; color: var(--muted); padding: 0 6px; font-size: 1.1rem; line-height: 1; }
+  .msg { padding: 10px 14px; border-radius: 10px; margin-top: 12px; }
+  .msg.err { background: var(--warn-soft); color: var(--warn); }
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+
+  .stats { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); margin-bottom: 14px; }
+  .stat { background: var(--accent-soft); border-radius: 10px; padding: 10px 12px; }
+  .stat b { display: block; font-size: 1.4rem; }
+  .stat span { color: var(--muted); font-size: .85rem; }
+  .pace { padding: 12px 14px; border-radius: 10px; margin-bottom: 14px; background: var(--done-soft); }
+  .pace.behind { background: var(--warn-soft); }
+
+  .tabs { display: flex; gap: 6px; margin-bottom: 14px; }
+  .tabs button { background: var(--off); color: var(--ink); }
+  .tabs button[aria-selected=true] { background: var(--accent); color: #fff; }
+
+  .month { margin-bottom: 22px; break-inside: avoid; }
+  .month h3 { margin: 0 0 8px; font-size: 1.05rem; }
+  .cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+  .dow { text-align: center; font-size: .75rem; font-weight: 700; color: var(--muted); padding: 2px 0; }
+  .day { min-height: 74px; border: 1px solid var(--line); border-radius: 6px; padding: 3px 4px; font-size: .75rem; background: var(--card); overflow: hidden; }
+  .day.blank { border: 0; background: transparent; }
+  .day.off { background: var(--off); color: var(--muted); }
+  .day.today { box-shadow: inset 0 0 0 2px var(--today); }
+  .day .num { font-weight: 700; font-size: .8rem; }
+  .due { display: block; margin-top: 2px; background: var(--accent-soft); border-left: 3px solid var(--accent); border-radius: 3px; padding: 1px 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .due.done { background: var(--done-soft); border-color: var(--done); text-decoration: line-through; color: var(--muted); }
+  .offtag { display: block; font-style: italic; }
+
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: .85rem; color: var(--muted); }
+  td input { width: 20px; height: 20px; accent-color: var(--done); }
+  tr.done td { color: var(--muted); }
+  tr.done td.name { text-decoration: line-through; }
+  tr.late td.date { color: var(--warn); font-weight: 600; }
+
+  @media (max-width: 560px) {
+    .day { min-height: 54px; font-size: .65rem; }
+    .due { white-space: normal; }
+  }
+  @media print {
+    body { background: #fff; color: #000; }
+    .no-print { display: none !important; }
+    .card { border: 0; padding: 0; }
+    #listView, #calView { display: block !important; }
+    #listView { break-before: page; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>My Pacing Calendar</h1>
+  <p class="sub">Tell us how many assignments you have and when you want to finish. We'll spread them out into a plan you can follow, one step at a time.</p>
+
+  <section class="card no-print" aria-labelledby="setupHead">
+    <h2 id="setupHead">1. Set up your plan</h2>
+    <div class="grid">
+      <div>
+        <label for="course">Course name <span class="hint">(optional)</span></label>
+        <input type="text" id="course" placeholder="e.g., English 10A">
+      </div>
+      <div>
+        <label for="count">Number of assignments</label>
+        <input type="number" id="count" min="1" max="500" value="20">
+      </div>
+      <div>
+        <label for="start">Start date</label>
+        <input type="date" id="start">
+      </div>
+      <div>
+        <label for="end">Finish date</label>
+        <input type="date" id="end">
+      </div>
+    </div>
+
+    <div style="margin-top:16px">
+      <label>Days I'll work on this class</label>
+      <div class="days" id="days"></div>
+    </div>
+
+    <div style="margin-top:16px">
+      <label for="offDate">Days off <span class="hint">(holidays, breaks, busy days — nothing will be due)</span></label>
+      <div class="row">
+        <input type="date" id="offDate" aria-label="Day off">
+        <button type="button" class="ghost" id="addOff">Add day off</button>
+      </div>
+      <div class="chips" id="offChips"></div>
+    </div>
+
+    <div style="margin-top:16px">
+      <label for="names">Assignment names <span class="hint">(optional — one per line. If you fill this in, the number of assignments will match your list.)</span></label>
+      <textarea id="names" placeholder="Unit 1 Quiz&#10;Unit 1 Essay&#10;Unit 2 Reading Check"></textarea>
+    </div>
+
+    <div class="actions">
+      <button type="button" id="build">Make my calendar</button>
+      <button type="button" class="ghost" id="reset">Start over</button>
+    </div>
+    <div id="error" role="alert"></div>
+  </section>
+
+  <section class="card" id="results" hidden aria-labelledby="resHead">
+    <h2 id="resHead">2. Your plan</h2>
+    <div class="stats" id="stats"></div>
+    <div id="pace" aria-live="polite"></div>
+    <div class="tabs no-print" role="tablist">
+      <button type="button" role="tab" id="tabCal" aria-selected="true">Calendar</button>
+      <button type="button" role="tab" id="tabList" aria-selected="false">Checklist</button>
+    </div>
+    <div id="calView"></div>
+    <div id="listView" hidden></div>
+    <div class="actions no-print">
+      <button type="button" id="print">Print my plan</button>
+      <button type="button" class="ghost" id="ics">Add to my calendar app (.ics)</button>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  const KEY = 'pacingCalendar.v1';
+  const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const $ = id => document.getElementById(id);
+
+  let state = { course: '', count: 20, start: '', end: '', days: [1,2,3,4,5], off: [], names: '', done: {} };
+  let plan = [];
+
+  // ---------- date helpers (local dates, no time zone surprises) ----------
+  const parse = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); };
+  const iso = d => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate()+n); return x; };
+  const pretty = d => d.toLocaleDateString(undefined, { weekday:'short', month:'short', day:'numeric' });
+  const todayISO = iso(new Date());
+
+  // ---------- storage (optional; works without it) ----------
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+  function load() { try { const s = JSON.parse(localStorage.getItem(KEY)); if (s) state = Object.assign(state, s); } catch (e) {} }
+
+  // ---------- form ----------
+  function renderDays() {
+    $('days').innerHTML = DOW.map((n,i) =>
+      `<label><input type="checkbox" value="${i}" ${state.days.includes(i)?'checked':''}> ${n}</label>`).join('');
+  }
+  function renderOff() {
+    const sorted = [...state.off].sort();
+    $('offChips').innerHTML = sorted.map(d =>
+      `<span class="chip">${pretty(parse(d))}<button type="button" data-d="${d}" aria-label="Remove ${d}">×</button></span>`).join('');
+  }
+  function fillForm() {
+    $('course').value = state.course; $('count').value = state.count;
+    $('start').value = state.start; $('end').value = state.end; $('names').value = state.names;
+    renderDays(); renderOff();
+  }
+  function readForm() {
+    state.course = $('course').value.trim();
+    state.names = $('names').value;
+    state.start = $('start').value; state.end = $('end').value;
+    state.days = [...$('days').querySelectorAll('input:checked')].map(i => +i.value);
+    const list = nameList();
+    state.count = list.length ? list.length : parseInt($('count').value, 10);
+    if (list.length) $('count').value = list.length;
+  }
+  const nameList = () => state.names.split('\n').map(s => s.trim()).filter(Boolean);
+
+  // ---------- the plan ----------
+  function workDays() {
+    const out = [], offSet = new Set(state.off);
+    for (let d = parse(state.start); d <= parse(state.end); d = addDays(d,1)) {
+      if (state.days.includes(d.getDay()) && !offSet.has(iso(d))) out.push(iso(d));
+    }
+    return out;
+  }
+  function buildPlan() {
+    const err = [];
+    if (!state.count || state.count < 1) err.push('Enter how many assignments you have (at least 1).');
+    if (!state.start || !state.end) err.push('Pick both a start date and a finish date.');
+    else if (parse(state.end) < parse(state.start)) err.push('Your finish date needs to come after your start date.');
+    if (!state.days.length) err.push('Choose at least one day of the week to work.');
+    if (err.length) return showError(err);
+    const wd = workDays();
+    if (!wd.length) return showError(['There are no work days in that date range. Try adding more days or removing some days off.']);
+    showError([]);
+
+    const names = nameList(), N = state.count, D = wd.length;
+    // Spread evenly: assignment i is due on work day ceil((i+1) * D / N)
+    plan = [];
+    for (let i = 0; i < N; i++) {
+      const idx = Math.max(0, Math.ceil((i+1) * D / N) - 1);
+      plan.push({ id: i, name: names[i] || `Assignment ${i+1}`, date: wd[idx] });
+    }
+    // Clear old check marks that no longer match
+    Object.keys(state.done).forEach(k => { if (+k >= N) delete state.done[k]; });
+    save();
+    renderResults(D);
+  }
+  function showError(list) {
+    $('error').innerHTML = list.length ? `<div class="msg err">${list.join('<br>')}</div>` : '';
+  }
+
+  // ---------- results ----------
+  function renderResults(D) {
+    const N = plan.length;
+    const perDay = N / D;
+    const rhythm = perDay >= 1
+      ? `about ${Math.round(perDay*10)/10} per work day`
+      : `about 1 every ${Math.round(D/N*10)/10} work days`;
+    $('resHead').textContent = '2. Your plan' + (state.course ? ' for ' + state.course : '');
+    $('stats').innerHTML = `
+      <div class="stat"><b>${N}</b><span>assignments</span></div>
+      <div class="stat"><b>${D}</b><span>work days</span></div>
+      <div class="stat"><b>${rhythm.replace('about ','')}</b><span>your pace</span></div>
+      <div class="stat"><b>${pretty(parse(plan[N-1].date))}</b><span>last due date</span></div>`;
+    renderPace();
+    renderCalendar();
+    renderList();
+    $('results').hidden = false;
+  }
+  function renderPace() {
+    const shouldBe = plan.filter(p => p.date < todayISO).length;
+    const done = plan.filter(p => state.done[p.id]).length;
+    const box = $('pace');
+    if (todayISO < plan[0].date && done === 0) {
+      box.className = 'pace'; box.textContent = `Your first assignment is due ${pretty(parse(plan[0].date))}. You've got this!`;
+    } else if (done >= plan.length) {
+      box.className = 'pace'; box.textContent = `You finished all ${plan.length} assignments. Amazing work!`;
+    } else if (done >= shouldBe) {
+      box.className = 'pace'; box.textContent = `You've checked off ${done} of ${plan.length}. You're on track — keep it up!`;
+    } else {
+      box.className = 'pace behind';
+      box.textContent = `You've checked off ${done} of ${plan.length}. The plan says ${shouldBe} by now, so you're ${shouldBe-done} behind. That's okay — pick the next one and take it one step at a time.`;
+    }
+  }
+  function renderCalendar() {
+    const byDate = {};
+    plan.forEach(p => (byDate[p.date] = byDate[p.date] || []).push(p));
+    const offSet = new Set(state.off);
+    const s = parse(state.start), e = parse(state.end);
+    let html = '';
+    for (let m = new Date(s.getFullYear(), s.getMonth(), 1); m <= e; m = new Date(m.getFullYear(), m.getMonth()+1, 1)) {
+      const title = m.toLocaleDateString(undefined, { month:'long', year:'numeric' });
+      html += `<div class="month"><h3>${title}</h3><div class="cal">` + DOW.map(d => `<div class="dow">${d}</div>`).join('');
+      for (let b = 0; b < m.getDay(); b++) html += '<div class="day blank"></div>';
+      const last = new Date(m.getFullYear(), m.getMonth()+1, 0).getDate();
+      for (let n = 1; n <= last; n++) {
+        const d = new Date(m.getFullYear(), m.getMonth(), n), key = iso(d);
+        const inRange = d >= s && d <= e;
+        const isOff = inRange && (offSet.has(key) || !state.days.includes(d.getDay()));
+        let cls = 'day' + (!inRange || isOff ? ' off' : '') + (key === todayISO ? ' today' : '');
+        let inner = `<span class="num">${n}</span>`;
+        if (inRange && offSet.has(key)) inner += '<span class="offtag">Day off</span>';
+        (byDate[key] || []).forEach(p => {
+          inner += `<span class="due${state.done[p.id]?' done':''}" title="${esc(p.name)}">${esc(p.name)}</span>`;
+        });
+        html += `<div class="${cls}">${inner}</div>`;
+      }
+      html += '</div></div>';
+    }
+    $('calView').innerHTML = html;
+  }
+  function renderList() {
+    const rows = plan.map(p => {
+      const late = !state.done[p.id] && p.date < todayISO;
+      return `<tr class="${state.done[p.id]?'done':''} ${late?'late':''}">
+        <td><input type="checkbox" data-id="${p.id}" ${state.done[p.id]?'checked':''} aria-label="Mark ${esc(p.name)} done"></td>
+        <td>${p.id+1}</td><td class="name">${esc(p.name)}</td><td class="date">${pretty(parse(p.date))}</td></tr>`;
+    }).join('');
+    $('listView').innerHTML = `<table><thead><tr><th>Done</th><th>#</th><th>Assignment</th><th>Target date</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }
+  const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+  // ---------- calendar file ----------
+  function downloadICS() {
+    const stamp = new Date().toISOString().replace(/[-:]/g,'').split('.')[0] + 'Z';
+    const fold = s => s.replace(/[\\,;]/g, m => '\\' + m);
+    const lines = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Pacing Calendar//EN','CALSCALE:GREGORIAN'];
+    plan.forEach(p => {
+      const d = p.date.replace(/-/g,''), next = iso(addDays(parse(p.date),1)).replace(/-/g,'');
+      lines.push('BEGIN:VEVENT', `UID:pace-${d}-${p.id}@pacing`, `DTSTAMP:${stamp}`,
+        `DTSTART;VALUE=DATE:${d}`, `DTEND;VALUE=DATE:${next}`,
+        `SUMMARY:${fold((state.course ? state.course + ': ' : '') + p.name)}`, 'END:VEVENT');
+    });
+    lines.push('END:VCALENDAR');
+    const blob = new Blob([lines.join('\r\n')], { type: 'text/calendar' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = (state.course || 'my-pacing-plan').replace(/[^\w-]+/g,'-') + '.ics';
+    document.body.appendChild(a); a.click(); a.remove();
+  }
+
+  // ---------- events ----------
+  $('build').onclick = () => { readForm(); buildPlan(); $('results').scrollIntoView({ behavior:'smooth' }); };
+  $('names').addEventListener('input', () => { const n = $('names').value.split('\n').filter(s => s.trim()).length; if (n) $('count').value = n; });
+  $('addOff').onclick = () => {
+    const a = $('offDate').value;
+    if (!a) return;
+    if (!state.off.includes(a)) state.off.push(a);
+    $('offDate').value = '';
+    renderOff(); save();
+  };
+  $('offChips').onclick = e => {
+    const d = e.target.dataset && e.target.dataset.d;
+    if (d) { state.off = state.off.filter(x => x !== d); renderOff(); save(); }
+  };
+  $('listView').onchange = e => {
+    const id = e.target.dataset.id; if (id === undefined) return;
+    if (e.target.checked) state.done[id] = true; else delete state.done[id];
+    save(); renderPace(); renderCalendar(); renderList();
+  };
+  function tab(which) {
+    const cal = which === 'cal';
+    $('calView').hidden = !cal; $('listView').hidden = cal;
+    $('tabCal').setAttribute('aria-selected', cal); $('tabList').setAttribute('aria-selected', !cal);
+  }
+  $('tabCal').onclick = () => tab('cal');
+  $('tabList').onclick = () => tab('list');
+  $('print').onclick = () => window.print();
+  $('ics').onclick = downloadICS;
+  $('reset').onclick = () => {
+    if (!confirmReset()) return;
+    state = { course:'', count:20, start:'', end:'', days:[1,2,3,4,5], off:[], names:'', done:{} };
+    try { localStorage.removeItem(KEY); } catch (e) {}
+    fillForm(); $('results').hidden = true; showError([]);
+  };
+  // Two-click reset instead of a pop-up dialog
+  let armed = false;
+  function confirmReset() {
+    if (armed) { armed = false; $('reset').textContent = 'Start over'; return true; }
+    armed = true; $('reset').textContent = 'Click again to clear everything';
+    setTimeout(() => { armed = false; $('reset').textContent = 'Start over'; }, 4000);
+    return false;
+  }
+
+  // ---------- start ----------
+  load();
+  if (!state.start) state.start = todayISO;
+  fillForm();
+  if (state.start && state.end && state.count) buildPlan();
+})();
+</script>
+</body>
+</html>
